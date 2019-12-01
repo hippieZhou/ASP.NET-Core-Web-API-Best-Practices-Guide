@@ -26,7 +26,7 @@
 
 因此，最好的方式是保持 `ConfigureServices` 方法干净，并且尽可能地具有可读性。当然，我们需要在该方法内部编写代码来注册服务，但是我们可以通过使用 `扩展方法` 来让我们的代码更加地可读和可维护。
 
-例如，让我们看一个注册 CORS 服务的错误方式：
+例如，让我们看一个注册 CORS 服务的不好方式：
 
 ```C#
 public void ConfigureServices(IServiceCollection services)
@@ -322,4 +322,184 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 
 ASP.NET Core 的过滤器可以让我们在请求管道的特定状态之前或之后运行一些代码。因此如果我们的 action  中有重复验证的话，可以使用它来执行验证操作。
 
-当我们在 action 方法中处理 PUT 或者 POST 请求时，我们需要验证我们的模型对象是否符合我们的预期。
+当我们在 action 方法中处理 PUT 或者 POST 请求时，我们需要验证我们的模型对象是否符合我们的预期。作为结果，这将导致我们的验证代码重复，我们希望避免出现这种情况，（基本上，我们应该尽我们所能避免出现任何代码重复。）我们可以在代码中通过使用 ActionFilter 来代替我们的验证代码：
+
+```C#
+if (!ModelState.IsValid)
+{
+    //bad request and logging logic
+}
+```
+
+我们可以创建一个过滤器：
+
+```C#
+public class ModelValidationAttribute : ActionFilterAttribute
+{
+    public override void OnActionExecuting(ActionExecutingContext context)
+    {
+        if (!context.ModelState.IsValid)
+        {
+            context.Result = new BadRequestObjectResult(context.ModelState);
+        }
+    }
+}
+```
+
+然后在 `Startup` 类的 `ConfigureServices` 函数中将其注入：
+
+```C#
+services.AddScoped<ModelValidationAttribute>();
+```
+
+现在，我们可以将上述注入的过滤器应用到我们的 action 中。
+
+## Microsoft.AspNetCore.all 元包
+
+> MICROSOFT.ASPNETCORE.ALL META-PACKAGE
+
+注：如果你使用的是 2.1 和更高版本的 ASP.NET Core。建议使用 Microsoft.AspNetCore.App 包，而不是 Microsoft.AspNetCore.All。这一切都是出于安全原因。此外，如果使用 2.1 版本创建新的 WebAPI 项目，我们将自动获取 AspNetCore.App 包，而不是 AspNetCore.All。
+
+这个元包包含了所有 AspNetCore 的相关包，EntityFrameworkCore 包，SignalR 包（version 2.1） 和依赖框架运行的支持包。采用这种方式创建一个新项目很方便，因为我们不需要手动安装一些我们可能使用到的包。
+
+当然，为了能使用 Microsoft.AspNetCore.all 元包，需要确保你的机器安装了 .NET Core Runtime。
+
+## 路由
+
+> Routing
+
+在 .NET Core Web API 项目中，我们应该使用属性路由代替传统路由，这是因为属性路由可以帮助我们匹配路由参数名称与 Action 内的实际参数方法。另一个原因是路由参数的描述，对我们而言，一个名为 "ownerId" 的参数要比 "id" 更加具有可读性。
+
+我们可以使用 **[Route]** 属性来在控制器的顶部进行标注：
+
+```C#
+[Route("api/[controller]")]
+public class OwnerController : Controller
+{
+    [Route("{id}")]
+    [HttpGet]
+    public IActionResult GetOwnerById(Guid id)
+    {
+    }
+}
+```
+
+还有另一种方式为控制器和操作创建路由规则：
+
+```C#
+[Route("api/owner")]
+public class OwnerController : Controller
+{
+    [Route("{id}")]
+    [HttpGet]
+    public IActionResult GetOwnerById(Guid id)
+    {
+    }
+}
+```
+
+对于这两种方式哪种会好一些存在分歧，但是我们经常建议采用第二种方式。这是我们一直在项目中采用的方式。
+
+当我们谈论路由时，我们需要提到路由的命名规则。我们可以为我们的操作使用描述性名称，但对于 路由/节点，我们应该使用 NOUNS 而不是 VERBS。
+
+一个较差的示例：
+
+```C#
+[Route("api/owner")]
+public class OwnerController : Controller
+{
+    [HttpGet("getAllOwners")]
+    public IActionResult GetAllOwners()
+    {
+    }
+    [HttpGet("getOwnerById/{id}"]
+    public IActionResult GetOwnerById(Guid id)
+    {
+    }
+}
+```
+
+一个较好的示例：
+
+```C#
+[Route("api/owner")]
+public class OwnerController : Controller
+{
+    [HttpGet]
+    public IActionResult GetAllOwners()
+    {
+    }
+    [HttpGet("{id}"]
+    public IActionResult GetOwnerById(Guid id)
+    {
+    }
+}
+
+```
+
+更多关于 Restful 实践的细节解释，请查阅：[Top REST API Best Practices](https://code-maze.com/top-rest-api-best-practices/)
+
+## 日志
+
+> LOGGING
+
+如果我们打算将我们的应用程序发布到生产环境，我们应该在合适的位置添加一个日志记录机制。在生产环境中记录日志对于我们梳理应用程序的运行很有帮助。
+
+.NET Core 通过继承 `ILogger` 接口实现了它自己的日志记录。通过借助依赖注入机制，它可以很容易地使用。
+
+```C#
+public class TestController: Controller
+{
+    private readonly ILogger _logger;
+    public TestController(ILogger<TestController> logger)
+    {
+        _logger = logger;
+    }
+}
+```
+
+然后，在我们的 action 中，我们可以通过使用 _logger 对象借助不同的日志级别来记录日志。
+
+.NET Core 支持使用于各种日志记录的 Provider。因此，我们可能会在项目中使用不同的 Provider 来实现我们的日志逻辑。
+
+NLog 是一个很不错的可以用于我们自定义的日志逻辑类库，它极具扩展性。支持结构化日志，且易于配置。我们可以将信息记录到控制台，文件甚至是数据库中。
+
+想了解更多关于该类库在 .NET Core 中的应用，请查阅：[.NET Core series – Logging With NLog.](https://code-maze.com/net-core-web-development-part3/)
+
+Serilog 也是一个很不错的类库，它适用于 .NET Core 内置的日志系统。
+
+## 加密
+
+> CRYPTOHELPER
+
+我们不会建议将密码以明文形式存储到数据库中。处于安全原因，我们需要对其进行哈希处理。这超出了本指南的内容范围。互联网上有大量哈希算法，其中不乏一些不错的方法来将密码进行哈希处理。
+
+但是如果需要为 .NET Core 的应用程序提供易于使用的加密类库，CryptoHelper 是一个不错的选择。
+
+CryptoHelper 是适用于 .NET Core 的独立密码哈希库，它是基于 PBKDF2 来实现的。通过创建 `Data Protection` 栈来将密码进行哈希化。这个类库在 NuGet 上是可用的，并且使用也很简单：
+
+```C#
+using CryptoHelper;
+
+// Hash a password
+public string HashPassword(string password)
+{
+    return Crypto.HashPassword(password);
+}
+
+// Verify the password hash against the given password
+public bool VerifyPassword(string hash, string password)
+{
+    return Crypto.VerifyHashedPassword(hash, password);
+}
+```
+
+## 内容协商
+
+> CONTENT NEGOTIATION
+
+默认情况下，.NET Core Web API 会返回 JSON 格式的结果。大多数情况下，这是我们所希望的。
+
+但是如果客户希望我们的 Web API 返回其它的响应格式，例如 XML 呢？
+
+为了解决这个问题，我们需要进行服务端配置，用于格式化我们的响应所需方式：
