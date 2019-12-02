@@ -22,7 +22,7 @@
 
 在 `Startup` 类中，有两个方法：`ConfigureServices` 是用于服务注册，`Configure` 方法是向应用程序的请求管道中添加中间件。
 
-因此，最好的方式是保持 `ConfigureServices` 方法干净，并且尽可能地具有可读性。当然，我们需要在该方法内部编写代码来注册服务，但是我们可以通过使用 `扩展方法` 来让我们的代码更加地可读和可维护。
+因此，最好的方式是保持 `ConfigureServices` 方法简洁，并且尽可能地具有可读性。当然，我们需要在该方法内部编写代码来注册服务，但是我们可以通过使用 `扩展方法` 来让我们的代码更加地可读和可维护。
 
 例如，让我们看一个注册 CORS 服务的不好方式：
 
@@ -39,11 +39,11 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-尽管这种方式看起来挺好，也能没有问题地将 CORS 服务注册成功。想象一下，在注册了十几个服务之后这个方法体的长度。
+尽管这种方式看起来挺好，也能正常地将 CORS 服务注册成功。但是想象一下，在注册了十几个服务之后这个方法体的长度。
 
 这样一点也不具有可读性。
 
-一种好的方式是通过在扩展类中创建静态方式：
+一种好的方式是通过在扩展类中创建静态方法：
 
 ```C#
 public static class ServiceExtensions
@@ -76,7 +76,7 @@ public void ConfigureServices(IServiceCollection services)
 
 > PROJECT ORGANIZATION
 
-我们应该尝试将我们的应该程序拆分为多个更小的项目。通过这种方式，我们可以获得最佳的项目组织方式，并能将关注点分离（SoC）.和我们的实体、契约、访问数据库、记录信息或者发送邮件的业务逻辑应该始终是在单独的 .NET Core 类库项目中。
+我们应该尝试将我们的应用程序拆分为多个小项目。通过这种方式，我们可以获得最佳的项目组织方式，并能将关注点分离（SoC）。我们的实体、契约、访问数据库操作、记录信息或者发送邮件的业务逻辑应该始终放在单独的 .NET Core 类库项目中。
 
 应用程序中的每个小项目都应该包含多个文件夹用来组织业务逻辑。
 
@@ -92,11 +92,11 @@ public void ConfigureServices(IServiceCollection services)
 
 > ENVIRONMENT BASED SETTINGS
 
-当我们开发应用程序时，它处于开发环境。但是一旦我们发布我们的应用程序，它将处于生产环境。因此，将每个环境进行分隔配置往往是一种好的实践方式。
+当我们开发应用程序时，它处于开发环境。但是一旦我们发布之后，它将处于生产环境。因此，将每个环境进行隔离配置往往是一种好的实践方式。
 
-在 .NET Core 中，这一点很容易完成。
+在 .NET Core 中，这一点很容易实现。
 
-一旦我们创建好了项目，我们就已经有一个 `appsettings.json` 文件，当我们展开它时会看到 `appsettings.Development.json` 文件：
+一旦我们创建好了项目，就已经有一个 `appsettings.json` 文件，当我们展开它时会看到 `appsettings.Development.json` 文件：
 
 <div align="center">
 
@@ -122,9 +122,9 @@ public void ConfigureServices(IServiceCollection services)
 
 > DATA ACCESS LAYER
 
-在一些不同的示例教程中，我们可能看到 DAL 的实现在主项目中，并且每个控制器中都有实例。这是我们不应该做的事情。
+在一些不同的示例教程中，我们可能看到 DAL 的实现在主项目中，并且每个控制器中都有实例。我们不建议这么做。
 
-当我们编写 DAL 时，我们应该将其作为一个独立的服务来创建。在 .NET Core 项目中，这一点很重要，因为当我们将 DAL 作为一个独立的服务时，我们就可以将其直接注入到 IOC（控制反转）容器中。IOC 是 .NET Core 内置的功能。通过这种方式，我们可以在任何控制器中通过构造函数注入的方式来使用。
+当我们编写 DAL 时，我们应该将其作为一个独立的服务来创建。在 .NET Core 项目中，这一点很重要，因为当我们将 DAL 作为一个独立的服务时，我们就可以将其直接注入到 IOC（控制反转）容器中。IOC 是 .NET Core 内置功能。通过这种方式，我们可以在任何控制器中通过构造函数注入的方式来使用。
 
 ```C#
 public class OwnerController: Controller
@@ -143,7 +143,7 @@ public class OwnerController: Controller
 
 控制器应该始终尽量保持整洁。我们不应该将任何业务逻辑放置于内。
 
-因此，我们的控制器应该复杂通过构造函数注入的方式接收服务实例，组织 HTTP 操作方法（GET，POST，PUT，DELETE，PATCH...）:
+因此，我们的控制器应该通过构造函数注入的方式接收服务实例，并组织 HTTP 的操作方法（GET，POST，PUT，DELETE，PATCH...）:
 
 ```C#
 public class OwnerController : Controller
@@ -183,7 +183,7 @@ public class OwnerController : Controller
 }
 ```
 
-我们的 action 应该尽量保持整洁简单，它们的职责应该包括处理 HTTP 请求，验证模型，捕捉异常和返回响应。
+我们的 Action 应该尽量保持简洁，它们的职责应该包括处理 HTTP 请求，验证模型，捕捉异常和返回响应。
 
 ```C#
 [HttpPost]
@@ -318,7 +318,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 
 > USING ACTIONFILTERS TO REMOVE DUPLICATED CODE
 
-ASP.NET Core 的过滤器可以让我们在请求管道的特定状态之前或之后运行一些代码。因此如果我们的 action  中有重复验证的话，可以使用它来执行验证操作。
+ASP.NET Core 的过滤器可以让我们在请求管道的特定状态之前或之后运行一些代码。因此如果我们的 action  中有重复验证的话，可以使用它来简化验证操作。
 
 当我们在 action 方法中处理 PUT 或者 POST 请求时，我们需要验证我们的模型对象是否符合我们的预期。作为结果，这将导致我们的验证代码重复，我们希望避免出现这种情况，（基本上，我们应该尽我们所能避免出现任何代码重复。）我们可以在代码中通过使用 ActionFilter 来代替我们的验证代码：
 
