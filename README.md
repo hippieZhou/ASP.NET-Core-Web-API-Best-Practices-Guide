@@ -1,8 +1,6 @@
-# ASP.NET Core Web API 最佳实践指南
+# ASP.NET Core Web API 最佳实践
 
-> ASP.NET-Core-Web-API-Best-Practices-Guide
-
-## 目录
+> [ASP.NET-Core-Web-API-Best-Practices-Guide](https://code-maze.us12.list-manage.com/track/click?u=9bb15645129501e5249a9a8e1&id=986d07e1f0&e=1184a539da)
 
 ## 介绍
 
@@ -500,6 +498,67 @@ public bool VerifyPassword(string hash, string password)
 
 默认情况下，.NET Core Web API 会返回 JSON 格式的结果。大多数情况下，这是我们所希望的。
 
-但是如果客户希望我们的 Web API 返回其它的响应格式，例如 XML 呢？
+但是如果客户希望我们的 Web API 返回其它的响应格式，例如 XML 格式呢？
 
-为了解决这个问题，我们需要进行服务端配置，用于格式化我们的响应所需方式：
+为了解决这个问题，我们需要进行服务端配置，用于按需格式化我们的响应结果：
+
+```C#
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddControllers().AddXmlSerializerFormatters();
+}
+```
+
+但有时客户端会请求一个我们 Web API 不支持的格式，因此最好的实践方式是对于未经处理的请求格式统一返回 406 状态码。这种方式也同样能在 ConfigureServices 方法中进行简单配置：
+
+```C#
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddControllers(options => options.ReturnHttpNotAcceptable = true).AddXmlSerializerFormatters();
+}
+```
+
+我们也可以创建我们自己的格式化规则。
+
+这一部分内容是一个很大的主题，如果你希望了解更对，请查阅：[Content Negotiation in .NET Core](https://code-maze.com/content-negotiation-dotnet-core/)
+
+## 使用 JWT
+
+> USING JWT
+
+现如今的 Web 开发中，JSON Web Tokens (JWT) 变得越来越流行。得益于 .NET Core 内置了对 JWT 的支持，因此实现起来非常容易。JWT 是一个开发标准，它允许我们以 JSON 格式在服务端和客户端进行安全的数据传输。
+
+我们可以在 ConfigureServices 中配置 JWT 认证：
+
+```C#
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options => 
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                //configurations
+            };
+        });
+}
+```
+
+为了能在应用程序中使用它，我们还需要在 Configure 中调用下面一段代码：
+
+```C#
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+{
+    app.UseAuthentication();
+}
+```
+
+我们也可以将 JWT 用于授权部分，只需添加角色声明到 JWT 配置中即可。
+
+更多关于 .NET Core 中 JWT 认证和授权部分，请查阅：[authentication-aspnetcore-jwt-1](https://code-maze.com/authentication-aspnetcore-jwt-1/) 和 [authentication-aspnetcore-jwt-2](https://code-maze.com/authentication-aspnetcore-jwt-2/)
+
+## 总结
+
+在这份指南中，我们的主要目的是让你熟悉关于使用 .NET Core 开发 web API 项目时的一些最佳实践。这里面的部分内容在其它框架中也同样适用。因此，熟练掌握它们很有用。
+
+非常感谢你能阅读这份指南，希望它能对你有所帮助。
