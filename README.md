@@ -314,7 +314,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 }
 ```
 
-## 使用操作过滤器移除重复代码
+## 使用过滤器移除重复代码
 
 > USING ACTIONFILTERS TO REMOVE DUPLICATED CODE
 
@@ -364,7 +364,7 @@ services.AddScoped<ModelValidationAttribute>();
 
 ## 路由
 
-> Routing
+> ROUTING
 
 在 .NET Core Web API 项目中，我们应该使用属性路由代替传统路由，这是因为属性路由可以帮助我们匹配路由参数名称与 Action 内的实际参数方法。另一个原因是路由参数的描述，对我们而言，一个名为 "ownerId" 的参数要比 "id" 更加具有可读性。
 
@@ -538,7 +538,19 @@ public void ConfigureServices(IServiceCollection services)
         {
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                //configurations
+                ValidateIssuer = true,
+                ValidIssuer = _authToken.Issuer,
+
+                ValidateAudience = true,
+                ValidAudience = _authToken.Audience,
+
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authToken.Key)),
+
+                RequireExpirationTime = true,
+                ValidateLifetime = true,
+
+                //others
             };
         });
 }
@@ -551,6 +563,33 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 {
     app.UseAuthentication();
 }
+```
+
+此外，创建 Token 可以使用如下方式：
+
+```C#
+var securityToken = new JwtSecurityToken(
+                claims: new Claim[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier,user.Id),
+                    new Claim(ClaimTypes.Email,user.Email)
+                },
+                issuer: _authToken.Issuer,
+                audience: _authToken.Audience,
+                notBefore: DateTime.Now,
+                expires: DateTime.UtcNow.AddDays(_authToken.Expires),
+                signingCredentials: new SigningCredentials(
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authToken.Key)),
+                    SecurityAlgorithms.HmacSha256Signature));
+
+Token = new JwtSecurityTokenHandler().WriteToken(securityToken)
+```
+
+基于 Token 的用户验证可以在控制器中使用如下方式：
+
+```C#
+var auth = await HttpContext.AuthenticateAsync();
+var id = auth.Principal.Claims.FirstOrDefault(x => x.Type.Equals(ClaimTypes.NameIdentifier))?.Value;
 ```
 
 我们也可以将 JWT 用于授权部分，只需添加角色声明到 JWT 配置中即可。
