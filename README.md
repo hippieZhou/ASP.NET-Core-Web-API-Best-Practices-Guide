@@ -70,7 +70,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-了解更多关于 .NET Core's 的项目配置，请查看：[.NET Core Project Configuration](https://code-maze.com/net-core-web-development-part2/)
+了解更多关于 .NET Core 的项目配置，请查看：[.NET Core Project Configuration](https://code-maze.com/net-core-web-development-part2/)
 
 ## 项目组织
 
