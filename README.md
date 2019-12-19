@@ -148,8 +148,8 @@ public class OwnerController: Controller
 ```C#
 public class OwnerController : Controller
 {
-    private ILoggerManager _logger;
-    private IRepository _repository;
+    private readonly ILoggerManager _logger;
+    private readonly IRepository _repository;
     public OwnerController(ILoggerManager logger, IRepository repository)
     {
         _logger = logger;
@@ -470,7 +470,7 @@ Serilog 也是一个很不错的类库，它适用于 .NET Core 内置的日志�
 
 > CRYPTOHELPER
 
-我们不会建议将密码以明文形式存储到数据库中。处于安全原因，我们需要对其进行哈希处理。这超出了本指南的内容范围。互联网上有大量哈希算法，其中不乏一些不错的方法来将密码进行哈希处理。
+我们不会建议将密码以明文形式存储到数据库中。出于安全原因，我们需要对其进行哈希处理。这超出了本指南的内容范围。互联网上有大量哈希算法，其中不乏一些不错的方法来将密码进行哈希处理。
 
 但是如果需要为 .NET Core 的应用程序提供易于使用的加密类库，CryptoHelper 是一个不错的选择。
 
@@ -577,7 +577,7 @@ var securityToken = new JwtSecurityToken(
                 issuer: _authToken.Issuer,
                 audience: _authToken.Audience,
                 notBefore: DateTime.Now,
-                expires: DateTime.UtcNow.AddDays(_authToken.Expires),
+                expires: DateTime.Now.AddDays(_authToken.Expires),
                 signingCredentials: new SigningCredentials(
                     new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authToken.Key)),
                     SecurityAlgorithms.HmacSha256Signature));
