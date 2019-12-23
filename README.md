@@ -232,23 +232,20 @@ public IActionResult CreateOwner([FromBody]Owner owner)
 ```C#
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 {
-    app.UseExceptionHandler(config => 
+    app.UseExceptionHandler(config =>
     {
-        config.Run(async context => 
+        config.Run(async context =>
         {
-            context.Response.StatusCode = 500;
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             context.Response.ContentType = "application/json";
 
             var error = context.Features.Get<IExceptionHandlerFeature>();
-            if (error != null)
+            var ex = error?.Error;
+            await context.Response.WriteAsync(new ErrorModel
             {
-                var ex = error.Error;
-                await context.Response.WriteAsync(new ErrorModel
-                {
-                    StatusCode = 500,
-                    ErrorMessage = ex.Message
-                }.ToString());
-            }
+                StatusCode = StatusCodes.Status500InternalServerError,
+                ErrorMessage = ex?.Message
+            }.ToString());
         });
     });
 
