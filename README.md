@@ -549,7 +549,18 @@ public void ConfigureServices(IServiceCollection services)
 
                 RequireExpirationTime = true,
                 ValidateLifetime = true,
-
+                
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/json; charset=utf-8";
+                        var message = env.IsDevelopment() ? context.Exception.ToString() : "An error occurred processing your authentication.";
+                        var result = JsonConvert.SerializeObject(new { message });
+                        return context.Response.WriteAsync(result);
+                    }
+                };
                 //others
             };
         });
