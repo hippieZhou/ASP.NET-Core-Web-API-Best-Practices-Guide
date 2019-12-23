@@ -129,7 +129,7 @@ public void ConfigureServices(IServiceCollection services)
 ```C#
 public class OwnerController: Controller
 {
-    private IRepository _repository;
+    private readonly IRepository _repository;
     public OwnerController(IRepository repository)
     {
         _repository = repository;
@@ -505,7 +505,7 @@ public bool VerifyPassword(string hash, string password)
 ```C#
 public void ConfigureServices(IServiceCollection services)
 {
-    services.AddControllers().AddXmlSerializerFormatters();
+    services.AddControllers().AddXmlDataContractSerializerFormatters();
 }
 ```
 
@@ -514,7 +514,7 @@ public void ConfigureServices(IServiceCollection services)
 ```C#
 public void ConfigureServices(IServiceCollection services)
 {
-    services.AddControllers(options => options.ReturnHttpNotAcceptable = true).AddXmlSerializerFormatters();
+    services.AddControllers(options => options.ReturnHttpNotAcceptable = true).AddXmlDataContractSerializerFormatters();
 }
 ```
 
