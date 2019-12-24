@@ -1,8 +1,28 @@
-# ASP.NET Core Web API 最佳实践
+<!-- TOC depthfrom:2 orderedlist:true -->
+
+- [1.1. 介绍](#11-介绍)
+- [1.2. Startup 类 和 服务配置](#12-startup-类-和-服务配置)
+- [1.3. 项目组织](#13-项目组织)
+- [1.4. 基于环境的设置](#14-基于环境的设置)
+- [1.5. 数据访问层](#15-数据访问层)
+- [1.6. 控制器](#16-控制器)
+- [1.7. 处理全局异常](#17-处理全局异常)
+- [1.8. 使用过滤器移除重复代码](#18-使用过滤器移除重复代码)
+- [1.9. Microsoft.AspNetCore.all 元包](#19-microsoftaspnetcoreall-元包)
+- [1.10. 路由](#110-路由)
+- [1.11. 日志](#111-日志)
+- [1.12. 加密](#112-加密)
+- [1.13. 内容协商](#113-内容协商)
+- [1.14. 使用 JWT](#114-使用-jwt)
+- [1.15. 总结](#115-总结)
+
+<!-- /TOC -->
+
+# 1. ASP.NET Core Web API 最佳实践
 
 > [ASP.NET-Core-Web-API-Best-Practices-Guide](https://code-maze.us12.list-manage.com/track/click?u=9bb15645129501e5249a9a8e1&id=986d07e1f0&e=1184a539da)
 
-## 介绍
+## 1.1. 介绍
 
 当我们编写一个项目的时候，我们的主要目标是使它能如期运行，并尽可能地满足所有用户需求。
 
@@ -16,7 +36,7 @@
 
 现在，让我们开始想一些可以应用到 ASP.NET Web API 项目中的一些最佳实践。
 
-## Startup 类 和 服务配置
+## 1.2. Startup 类 和 服务配置
 
 > STARTUP CLASS AND THE SERVICE CONFIGURATION
 
@@ -72,7 +92,7 @@ public void ConfigureServices(IServiceCollection services)
 
 了解更多关于 .NET Core 的项目配置，请查看：[.NET Core Project Configuration](https://code-maze.com/net-core-web-development-part2/)
 
-## 项目组织
+## 1.3. 项目组织
 
 > PROJECT ORGANIZATION
 
@@ -88,7 +108,7 @@ public void ConfigureServices(IServiceCollection services)
 
 </div>
 
-## 基于环境的设置
+## 1.4. 基于环境的设置
 
 > ENVIRONMENT BASED SETTINGS
 
@@ -118,7 +138,7 @@ public void ConfigureServices(IServiceCollection services)
 
 设置修改后，我们就可以通过不同的 appsettings 文件来加载不同的配置，取决于我们应用程序当前所处环境，.NET Core 将会给我们提供正确的设置。更多关于这一主题，请查阅：[Multiple Environments in ASP.NET Core.](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments?view=aspnetcore-3.0)
 
-## 数据访问层
+## 1.5. 数据访问层
 
 > DATA ACCESS LAYER
 
@@ -137,7 +157,7 @@ public class OwnerController: Controller
 }
 ```
 
-## 控制器
+## 1.6. 控制器
 
 > CONTROLLERS
 
@@ -223,7 +243,7 @@ public IActionResult CreateOwner([FromBody]Owner owner)
 - Forbid => returns the 403 status code
 - StatusCode => returns the status code we provide as input
 
-## 处理全局异常
+## 1.7. 处理全局异常
 
 > HANDLING ERRORS GLOBALLY
 
@@ -311,7 +331,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 }
 ```
 
-## 使用过滤器移除重复代码
+## 1.8. 使用过滤器移除重复代码
 
 > USING ACTIONFILTERS TO REMOVE DUPLICATED CODE
 
@@ -349,7 +369,7 @@ services.AddScoped<ModelValidationAttribute>();
 
 现在，我们可以将上述注入的过滤器应用到我们的 action 中。
 
-## Microsoft.AspNetCore.all 元包
+## 1.9. Microsoft.AspNetCore.all 元包
 
 > MICROSOFT.ASPNETCORE.ALL META-PACKAGE
 
@@ -359,7 +379,7 @@ services.AddScoped<ModelValidationAttribute>();
 
 当然，为了能使用 Microsoft.AspNetCore.all 元包，需要确保你的机器安装了 .NET Core Runtime。
 
-## 路由
+## 1.10. 路由
 
 > ROUTING
 
@@ -434,7 +454,7 @@ public class OwnerController : Controller
 
 更多关于 Restful 实践的细节解释，请查阅：[Top REST API Best Practices](https://code-maze.com/top-rest-api-best-practices/)
 
-## 日志
+## 1.11. 日志
 
 > LOGGING
 
@@ -463,7 +483,7 @@ NLog 是一个很不错的可以用于我们自定义的日志逻辑类库，它
 
 Serilog 也是一个很不错的类库，它适用于 .NET Core 内置的日志系统。
 
-## 加密
+## 1.12. 加密
 
 > CRYPTOHELPER
 
@@ -489,7 +509,7 @@ public bool VerifyPassword(string hash, string password)
 }
 ```
 
-## 内容协商
+## 1.13. 内容协商
 
 > CONTENT NEGOTIATION
 
@@ -519,7 +539,7 @@ public void ConfigureServices(IServiceCollection services)
 
 这一部分内容是一个很大的主题，如果你希望了解更对，请查阅：[Content Negotiation in .NET Core](https://code-maze.com/content-negotiation-dotnet-core/)
 
-## 使用 JWT
+## 1.14. 使用 JWT
 
 > USING JWT
 
@@ -604,7 +624,7 @@ var id = auth.Principal.Claims.FirstOrDefault(x => x.Type.Equals(ClaimTypes.Name
 
 更多关于 .NET Core 中 JWT 认证和授权部分，请查阅：[authentication-aspnetcore-jwt-1](https://code-maze.com/authentication-aspnetcore-jwt-1/) 和 [authentication-aspnetcore-jwt-2](https://code-maze.com/authentication-aspnetcore-jwt-2/)
 
-## 总结
+## 1.15. 总结
 
 在这份指南中，我们的主要目的是让你熟悉关于使用 .NET Core 开发 web API 项目时的一些最佳实践。这里面的部分内容在其它框架中也同样适用。因此，熟练掌握它们很有用。
 
