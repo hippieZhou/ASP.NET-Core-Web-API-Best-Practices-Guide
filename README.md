@@ -662,6 +662,8 @@ public class NotificationService : BackgroundService
 }
 ```
 
+> 这里需要注意一点的是，如果我们在构造函数注入的对象具有一定的作用域，这个时候直接注入该对象会发生 `InvalidOperationException` 的异常，此时建议通过注入 `IServiceScopeFactory` 对象来创建作用域从而间接获取目标对象。
+
 接着，在 `Startup` 类中的 `ConfigureServices` 进行相关配置，示例如下：
 
 ```C#
