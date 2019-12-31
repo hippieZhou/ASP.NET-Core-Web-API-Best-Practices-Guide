@@ -647,8 +647,6 @@ public static string GenerateShortUrl()
 }
 ```
 
-> 如果在实际项目中要这种短地址服务的话，建议采用分布式数据库较好，例如 MongoDB
-
 如果你想了解更多关于如何创建短地址服务，这里有一份教程推荐给你：[Creating a Url Shortener Service From Scratch with .Net Core 3.0](https://blog.usejournal.com/creating-a-url-shortener-service-from-scratch-with-net-core-e8ebacad12c1)
 
 ## 1.16. 后台服务
