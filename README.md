@@ -15,7 +15,8 @@
 - [1.13. 内容协商](#113-内容协商)
 - [1.14. 使用 JWT](#114-使用-jwt)
 - [1.15. 短地址算法](#115-短地址算法)
-- [1.16. 总结](#116-总结)
+- [1.16. 后台服务](#116-后台服务)
+- [1.17. 总结](#117-总结)
 
 <!-- /TOC -->
 
@@ -650,7 +651,70 @@ public static string GenerateShortUrl()
 
 如果你想了解更多关于如何创建短地址服务，这里有一份教程推荐给你：[Creating a Url Shortener Service From Scratch with .Net Core 3.0](https://blog.usejournal.com/creating-a-url-shortener-service-from-scratch-with-net-core-e8ebacad12c1)
 
-## 1.16. 总结
+## 1.16. 后台服务
+
+>BACKGROUNDSERVICE
+
+得益于 Asp.Net Core 框架的优越性，我们可以不需要安装任何外部依赖库就可以轻易实现一个功能强大且能长期运行的后台服务。
+
+首先，创建一个继承自抽象类的 `BackgroundService` 实现类，然后实现里面的抽象方法 `ExecuteAsync` 即可，你可以参考下述方式：
+
+```C#
+public class NotificationService : BackgroundService
+{
+    private readonly NotificationSettings _settings;
+    private readonly ILogger<NotificationService> _logger;
+    public NotificationService(IOptions<NotificationSettings> settings, ILogger<NotificationService> logger)
+    {
+        _settings = settings.Value;
+        _logger = logger;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        _logger.LogDebug($"GracePeriodManagerService is starting.");
+
+        stoppingToken.Register(() => _logger.LogDebug($" GracePeriod background task is stopping."));
+
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            _logger.LogDebug("{0},GracePeriod task doing background work.", new[] { DateTime.Now });
+
+            // do what you want
+
+            await Task.Delay(_settings.CheckUpdateTime, stoppingToken);
+        }
+    }
+}
+```
+
+> 这里需要注意一点的是，如果我们在构造函数注入的对象具有一定的作用域，这个时候直接注入该对象会发生 `InvalidOperationException` 的异常，此时建议通过注入 `IServiceScopeFactory` 对象来创建作用域从而间接获取目标对象。
+
+接着，在 `Startup` 类中的 `ConfigureServices` 进行相关配置，示例如下：
+
+```C#
+public void ConfigureServices(IServiceCollection services)
+{
+    services.Configure<NotificationSettings>(Configuration.GetSection(nameof(NotificationSettings)));
+    services.AddHostedService<NotificationService>();
+}
+```
+
+此时，我们就成功创建了一个可以长时间运行的后台服务。为了避免服务能及时在主进程退出时做相应处理，我们可以在 `Program` 类中进行如下配置：
+
+```C#
+public static IHostBuilder CreateHostBuilder(string[] args) =>
+    Host.CreateDefaultBuilder(args)
+        .ConfigureWebHostDefaults(webBuilder =>
+        {
+            webBuilder.UseShutdownTimeout(TimeSpan.FromSeconds(5));
+            webBuilder.UseStartup<Startup>();
+        });
+```
+
+更多关于后台服务的部分，请查阅：[Background tasks with hosted services in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-3.1&tabs=visual-studio)
+
+## 1.17. 总结
 
 在这份指南中，我们的主要目的是让你熟悉关于使用 .NET Core 开发 web API 项目时的一些最佳实践。这里面的部分内容在其它框架中也同样适用。因此，熟练掌握它们很有用。
 
