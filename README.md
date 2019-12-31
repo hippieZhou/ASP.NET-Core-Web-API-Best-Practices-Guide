@@ -14,7 +14,8 @@
 - [1.12. 加密](#112-加密)
 - [1.13. 内容协商](#113-内容协商)
 - [1.14. 使用 JWT](#114-使用-jwt)
-- [1.15. 总结](#115-总结)
+- [1.15. 短地址算法](#115-短地址算法)
+- [1.16. 总结](#116-总结)
 
 <!-- /TOC -->
 
@@ -624,7 +625,32 @@ var id = auth.Principal.Claims.FirstOrDefault(x => x.Type.Equals(ClaimTypes.Name
 
 更多关于 .NET Core 中 JWT 认证和授权部分，请查阅：[authentication-aspnetcore-jwt-1](https://code-maze.com/authentication-aspnetcore-jwt-1/) 和 [authentication-aspnetcore-jwt-2](https://code-maze.com/authentication-aspnetcore-jwt-2/)
 
-## 1.15. 总结
+## 1.15. 短地址算法
+
+> Creating a Url Shortener Service
+
+如果你想通过 .NET Core 来构建短地址服务，那么这里有一个比较不错的生成算法推荐给你：
+
+```C#
+public static string GenerateShortUrl()
+{
+    string urlsafe = string.Empty;
+    Enumerable.Range(48, 75)
+        .Where(i => i < 58 || i > 64 && i < 91 || i > 96)
+        .OrderBy(o => new Random().Next())
+        .ToList()
+        .ForEach(i => urlsafe += Convert.ToChar(i));
+    string token = urlsafe.Substring(new Random().Next(0, urlsafe.Length), new Random().Next(2, 6));
+
+    return token;
+}
+```
+
+> 如果在实际项目中要这种短地址服务的话，建议采用分布式数据库较好，例如 MongoDB
+
+如果你想了解更多关于如何创建短地址服务，这里有一份教程推荐给你：[Creating a Url Shortener Service From Scratch with .Net Core 3.0](https://blog.usejournal.com/creating-a-url-shortener-service-from-scratch-with-net-core-e8ebacad12c1)
+
+## 1.16. 总结
 
 在这份指南中，我们的主要目的是让你熟悉关于使用 .NET Core 开发 web API 项目时的一些最佳实践。这里面的部分内容在其它框架中也同样适用。因此，熟练掌握它们很有用。
 
