@@ -15,7 +15,8 @@
 - [1.13. 内容协商](#113-内容协商)
 - [1.14. 使用 JWT](#114-使用-jwt)
 - [1.15. 后台服务](#115-后台服务)
-- [1.16. 总结](#116-总结)
+- [1.16. 输入验证](#116-输入验证)
+- [1.17. 总结](#117-总结)
 
 <!-- /TOC -->
 
@@ -688,7 +689,57 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
 
 更多关于后台服务的部分，请查阅：[Background tasks with hosted services in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-3.1&tabs=visual-studio)
 
-## 1.16. 总结
+## 1.16. 输入验证
+
+资源的输入验证可以采用多种方式，目前主要要如下方式：
+
+- 属性级别：
+    - Data Annotations
+- 属性和对象级别：
+    - IValidatableObject
+    - ValidationAttribute
+
+```C#
+public abstract class ModelResource : IValidatableObject
+{
+    [Display(Name = "名")]
+    [Required(ErrorMessage = "{0} 是必填项")]
+    [MaxLength(50, ErrorMessage = "{0} 的长度不能超过{1}")]
+    public string FirstName { get; set; }
+    [Display(Name = "姓")]
+    [Required(ErrorMessage = "{0} 是必填项")]
+    [MaxLength(50, ErrorMessage = "{0} 的长度不能超过{1}")]
+    public string LastName { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (FirstName == LastName)
+        {
+            //yield return new ValidationResult("姓和名不能一样", new[] { nameof(EmployeeAddOrUpdateDto) });
+            yield return new ValidationResult("姓和名不能一样", new[] { nameof(FirstName), nameof(LastName) });
+        }
+    }
+}
+
+public class CustomValidationAttribute:ValidationAttribute
+{
+    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+    {
+        var model = (ModelResource)validationContext.ObjectInstance;
+
+        if (model.LastName == model.FirstName)
+        {
+            return new ValidationResult(ErrorMessage, new[] { nameof(ModelResource) });
+        }
+        return ValidationResult.Success;
+    }
+}
+```
+
+更多关于输入验证部分，请查阅：[Model validation in ASP.NET Core MVC and Razor Pages](https://docs.microsoft.com/en-us/aspnet/core/mvc/models/validation?view=aspnetcore-3.1)
+
+
+## 1.17. 总结
 
 在这份指南中，我们的主要目的是让你熟悉关于使用 .NET Core 开发 web API 项目时的一些最佳实践。这里面的部分内容在其它框架中也同样适用。因此，熟练掌握它们很有用。
 
