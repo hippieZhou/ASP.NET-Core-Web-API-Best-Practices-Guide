@@ -25,7 +25,8 @@
 - [1.15. 短地址算法](#115-短地址算法)
 - [1.16. 后台服务](#116-后台服务)
 - [1.17. 输入验证](#117-输入验证)
-- [1.18. 总结](#118-总结)
+- [1.18. 缩略图](#118-缩略图)
+- [1.19. 总结](#119-总结)
 
 <!-- /TOC -->
 
@@ -770,8 +771,28 @@ public class CustomValidationAttribute:ValidationAttribute
 
 更多关于输入验证部分，请查阅：[Model validation in ASP.NET Core MVC and Razor Pages](https://docs.microsoft.com/en-us/aspnet/core/mvc/models/validation?view=aspnetcore-3.1)
 
+## 1.18. 缩略图
 
-## 1.18. 总结
+如果你想创建指定图片的缩略图，可以尝试用于 [System.Drawing.Common](https://github.com/dotnet/corefx) 来解决，示例代码如下所示：
+
+```C#
+Image image = Image.FromFile(sourceFile);
+Image thumb = image.GetThumbnailImage(300, 250, () => false, IntPtr.Zero);
+thumb.Save(thumbFile);
+```
+
+> 如果在 Linux 上运行，需要提前安装 *libgdiplus* 库：`apt install libgdiplus`
+
+如果想创建视频文件的缩略图，可以尝试使用 [Xabe.FFmpeg](https://xabe.net/product/xabe_ffmpeg/) 来解决，示例代码如下所示：
+
+```C#
+await Conversion.Snapshot(sourceFile, thumbFile, TimeSpan.FromSeconds(0)).Start();
+```
+
+> 如果在 Linux 上运行，需要提前安装 *ffmpeg* 库：`apt install ffmpeg`
+
+
+## 1.19. 总结
 
 在这份指南中，我们的主要目的是让你熟悉关于使用 .NET Core 开发 web API 项目时的一些最佳实践。这里面的部分内容在其它框架中也同样适用。因此，熟练掌握它们很有用。
 
