@@ -2,7 +2,7 @@
 
 <h1>ASP.NET Core Web API 最佳实践</h1>
 
-> 如果你也有好的建议和实践，欢迎 PR
+> 英文版：[ASP.NET-Core-Web-API-Best-Practices-Guide](https://code-maze.us12.list-manage.com/track/click?u=9bb15645129501e5249a9a8e1&id=986d07e1f0&e=1184a539da)。如果你也有好的建议和实践，欢迎 PR
 
 </div>
 
@@ -27,8 +27,6 @@
   - [读取 `app.config`](#读取-appconfig)
   - [SyndicationFeed](#syndicationfeed)
 - [总结](#总结)
-
-[ASP.NET-Core-Web-API-Best-Practices-Guide](https://code-maze.us12.list-manage.com/track/click?u=9bb15645129501e5249a9a8e1&id=986d07e1f0&e=1184a539da)
 
 ## 介绍
 
