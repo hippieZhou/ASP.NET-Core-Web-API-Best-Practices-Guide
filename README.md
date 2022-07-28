@@ -61,7 +61,7 @@
 ```C#
 public void ConfigureServices(IServiceCollection services)
 {
-    services.AddCors(options => 
+    services.AddCors(options =>
     {
         options.AddPolicy("CorsPolicy", builder => builder.AllowAnyOrigin()
             .AllowAnyMethod()
@@ -259,7 +259,7 @@ public IActionResult CreateOwner([FromBody]Owner owner)
 
 > HANDLING ERRORS GLOBALLY
 
-在上面的示例中，我们的 action 内部有一个 `try-catch` 代码块。这一点很重要，我们需要在我们的 action 方法体中处理所有的异常（包括未处理的）。一些开发者在 action 中使用 `try-catch` 代码块，这种方式明显没有任何问题。但我们希望 action 尽量保持简洁。因此，从我们的 action 中删除  `try-catch` ,并将其放在一个集中的地方会是一种更好的方式。.NET Core 给我们提供了一种处理全局异常的方式，只需要稍加修改，就可以使用内置且完善的的中间件。我们需要做的修改就是在 `Startup` 类中修改 `Configure` 方法：
+在上面的示例中，我们的 action 内部有一个 `try-catch` 代码块。这一点很重要，我们需要在我们的 action 方法体中处理所有的异常（包括未处理的）。一些开发者在 action 中使用 `try-catch` 代码块，这种方式明显没有任何问题。但我们希望 action 尽量保持简洁。因此，从我们的 action 中删除 `try-catch` ,并将其放在一个集中的地方会是一种更好的方式。.NET Core 给我们提供了一种处理全局异常的方式，只需要稍加修改，就可以使用内置且完善的的中间件。我们需要做的修改就是在 `Startup` 类中修改 `Configure` 方法：
 
 ```C#
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -347,7 +347,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 
 > USING ACTIONFILTERS TO REMOVE DUPLICATED CODE
 
-ASP.NET Core 的过滤器可以让我们在请求管道的特定状态之前或之后运行一些代码。因此如果我们的 action  中有重复验证的话，可以使用它来简化验证操作。
+ASP.NET Core 的过滤器可以让我们在请求管道的特定状态之前或之后运行一些代码。因此如果我们的 action 中有重复验证的话，可以使用它来简化验证操作。
 
 当我们在 action 方法中处理 PUT 或者 POST 请求时，我们需要验证我们的模型对象是否符合我们的预期。作为结果，这将导致我们的验证代码重复，我们希望避免出现这种情况，（基本上，我们应该尽我们所能避免出现任何代码重复。）我们可以在代码中通过使用 ActionFilter 来代替我们的验证代码：
 
@@ -485,7 +485,7 @@ public class TestController: Controller
 }
 ```
 
-然后，在我们的 action 中，我们可以通过使用 _logger 对象借助不同的日志级别来记录日志。
+然后，在我们的 action 中，我们可以通过使用 \_logger 对象借助不同的日志级别来记录日志。
 
 .NET Core 支持使用于各种日志记录的 Provider。因此，我们可能会在项目中使用不同的 Provider 来实现我们的日志逻辑。
 
@@ -563,7 +563,7 @@ public void ConfigureServices(IServiceCollection services)
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options => 
+        .AddJwtBearer(options =>
         {
             options.TokenValidationParameters = new TokenValidationParameters
             {
@@ -578,7 +578,7 @@ public void ConfigureServices(IServiceCollection services)
 
                 RequireExpirationTime = true,
                 ValidateLifetime = true,
-                
+
                 options.Events = new JwtBearerEvents
                 {
                     OnAuthenticationFailed = context =>
@@ -661,7 +661,7 @@ public static string GenerateShortUrl()
 
 ## 1.16. 后台服务
 
->BACKGROUNDSERVICE
+> BACKGROUNDSERVICE
 
 得益于 Asp.Net Core 框架的优越性，我们可以不需要安装任何外部依赖库就可以轻易实现一个功能强大且能长期运行的后台服务。
 
@@ -727,10 +727,10 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
 资源的输入验证可以采用多种方式，目前主要要如下方式：
 
 - 属性级别：
-    - Data Annotations
+  - Data Annotations
 - 属性和对象级别：
-    - IValidatableObject
-    - ValidationAttribute
+  - IValidatableObject
+  - ValidationAttribute
 
 ```C#
 public abstract class ModelResource : IValidatableObject
@@ -781,7 +781,7 @@ Image thumb = image.GetThumbnailImage(300, 250, () => false, IntPtr.Zero);
 thumb.Save(thumbFile);
 ```
 
-> 如果在 Linux 上运行，需要提前安装 *libgdiplus* 库：`apt install libgdiplus`
+> 如果在 Linux 上运行，需要提前安装 _libgdiplus_ 库：`apt install libgdiplus`
 
 如果想创建视频文件的缩略图，可以尝试使用 [Xabe.FFmpeg](https://xabe.net/product/xabe_ffmpeg/) 来解决，示例代码如下所示：
 
@@ -789,8 +789,20 @@ thumb.Save(thumbFile);
 await Conversion.Snapshot(sourceFile, thumbFile, TimeSpan.FromSeconds(0)).Start();
 ```
 
-> 如果在 Linux 上运行，需要提前安装 *ffmpeg* 库：`apt install ffmpeg`
+> 如果在 Linux 上运行，需要提前安装 _ffmpeg_ 库：`apt install ffmpeg`
 
+## 1.19. 读取 `app.config`
+
+在 .NET 应用程序中，`app.config` 是一个特殊文件，它会在程序编译后自动转换为主程序同名的 `xxx.dll.config` 文件。我们可以通过使用 `System.Configuration.ConfigurationManager` 来读取其中内容。为了能正常读取，我们需要确保将该文件的 `build action` 设置为 `Content`, `copy to output directory` 设置为 `Copy if newer/Copy always`。在非主程序类型的项目中如果想读取该文件，我们需要在对应的 `xxx.csproj` 中添加如下配置：
+
+```
+  <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+    <Copy SourceFiles="app.config" DestinationFiles="$(OutDir)\ReSharperTestRunner.dll.config" />
+    <Copy SourceFiles="app.config" DestinationFiles="$(OutDir)\testhost.dll.config" />
+  </Target>
+```
+
+更多内容可参考：[ConfigurationManager doesn't find config file with "dotnet test"](https://github.com/dotnet/runtime/issues/22720)
 
 ## 1.19. 总结
 
