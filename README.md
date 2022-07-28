@@ -25,6 +25,7 @@
   - [输入验证](#输入验证)
   - [缩略图](#缩略图)
   - [读取 `app.config`](#读取-appconfig)
+  - [SyndicationFeed](#syndicationfeed)
 - [总结](#总结)
 
 [ASP.NET-Core-Web-API-Best-Practices-Guide](https://code-maze.us12.list-manage.com/track/click?u=9bb15645129501e5249a9a8e1&id=986d07e1f0&e=1184a539da)
@@ -798,6 +799,44 @@ await Conversion.Snapshot(sourceFile, thumbFile, TimeSpan.FromSeconds(0)).Start(
 ```
 
 更多内容可参考：[ConfigurationManager doesn't find config file with "dotnet test"](https://github.com/dotnet/runtime/issues/22720)
+
+### SyndicationFeed
+
+```csharp
+# write
+
+private static string Format(SyndicationFeed value)
+{
+    var settings = new XmlWriterSettings
+    {
+        Encoding = Encoding.UTF8,
+        NewLineHandling = NewLineHandling.Entitize,
+        NewLineOnAttributes = true,
+    };
+    using var stream = new MemoryStream();
+    using var xmlWriter = XmlWriter.Create(stream, settings);
+    var rssFormatter = new Atom10FeedFormatter(value);
+    rssFormatter.WriteTo(xmlWriter);
+    xmlWriter.Flush();
+    return Encoding.UTF8.GetString(stream.ToArray());
+}
+
+return Content(Format(feed), "application/atom+xml", Encoding.UTF8);
+
+# read
+private static SyndicationFeed ReadAsSyndicationFeed(ContentResult result)
+{
+    var respBody = result.Content;
+    if (respBody == null)
+        return null;
+    var bytes = Encoding.UTF8.GetBytes(respBody);
+    using var stream = new MemoryStream(bytes);
+    using var xmlReader = XmlReader.Create(stream);
+    var formatter = new Atom10FeedFormatter();
+    formatter.ReadFrom(xmlReader);
+    return formatter.Feed;
+}
+```
 
 ## 总结
 
