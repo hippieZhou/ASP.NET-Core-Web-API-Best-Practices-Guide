@@ -6,37 +6,30 @@
 
 </div>
 
-<!-- TOC depthfrom:2 orderedlist:true -->
-
-- [1. 正文](#1-正文)
-  - [1.1. 介绍](#11-介绍)
-  - [1.2. Startup 类 和 服务配置](#12-startup-类-和-服务配置)
-  - [1.3. 项目组织](#13-项目组织)
-  - [1.4. 基于环境的设置](#14-基于环境的设置)
-  - [1.5. 数据访问层](#15-数据访问层)
-  - [1.6. 控制器](#16-控制器)
-  - [1.7. 处理全局异常](#17-处理全局异常)
-  - [1.8. 使用过滤器移除重复代码](#18-使用过滤器移除重复代码)
-  - [1.9. Microsoft.AspNetCore.all 元包](#19-microsoftaspnetcoreall-元包)
-  - [1.10. 路由](#110-路由)
-  - [1.11. 日志](#111-日志)
-  - [1.12. 加密](#112-加密)
-  - [1.13. 内容协商](#113-内容协商)
-  - [1.14. 使用 JWT](#114-使用-jwt)
-  - [1.15. 短地址算法](#115-短地址算法)
-  - [1.16. 后台服务](#116-后台服务)
-  - [1.17. 输入验证](#117-输入验证)
-  - [1.18. 缩略图](#118-缩略图)
-  - [1.19. 读取 `app.config`](#119-读取-appconfig)
-  - [1.20. 总结](#120-总结)
-
-<!-- /TOC -->
-
-# 1. 正文
+- [介绍](#介绍)
+  - [Startup 类 和 服务配置](#startup-类-和-服务配置)
+  - [项目组织](#项目组织)
+  - [基于环境的设置](#基于环境的设置)
+  - [数据访问层](#数据访问层)
+  - [控制器](#控制器)
+  - [处理全局异常](#处理全局异常)
+  - [使用过滤器移除重复代码](#使用过滤器移除重复代码)
+  - [Microsoft.AspNetCore.all 元包](#microsoftaspnetcoreall-元包)
+  - [路由](#路由)
+  - [日志](#日志)
+  - [加密](#加密)
+  - [内容协商](#内容协商)
+  - [使用 JWT](#使用-jwt)
+  - [短地址算法](#短地址算法)
+  - [后台服务](#后台服务)
+  - [输入验证](#输入验证)
+  - [缩略图](#缩略图)
+  - [读取 `app.config`](#读取-appconfig)
+- [总结](#总结)
 
 [ASP.NET-Core-Web-API-Best-Practices-Guide](https://code-maze.us12.list-manage.com/track/click?u=9bb15645129501e5249a9a8e1&id=986d07e1f0&e=1184a539da)
 
-## 1.1. 介绍
+## 介绍
 
 当我们编写一个项目的时候，我们的主要目标是使它能如期运行，并尽可能地满足所有用户需求。
 
@@ -50,7 +43,7 @@
 
 现在，让我们开始想一些可以应用到 ASP.NET Web API 项目中的一些最佳实践。
 
-## 1.2. Startup 类 和 服务配置
+### Startup 类 和 服务配置
 
 > STARTUP CLASS AND THE SERVICE CONFIGURATION
 
@@ -106,7 +99,7 @@ public void ConfigureServices(IServiceCollection services)
 
 了解更多关于 .NET Core 的项目配置，请查看：[.NET Core Project Configuration](https://code-maze.com/net-core-web-development-part2/)
 
-## 1.3. 项目组织
+### 项目组织
 
 > PROJECT ORGANIZATION
 
@@ -122,7 +115,7 @@ public void ConfigureServices(IServiceCollection services)
 
 </div>
 
-## 1.4. 基于环境的设置
+### 基于环境的设置
 
 > ENVIRONMENT BASED SETTINGS
 
@@ -152,7 +145,7 @@ public void ConfigureServices(IServiceCollection services)
 
 设置修改后，我们就可以通过不同的 appsettings 文件来加载不同的配置，取决于我们应用程序当前所处环境，.NET Core 将会给我们提供正确的设置。更多关于这一主题，请查阅：[Multiple Environments in ASP.NET Core.](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments?view=aspnetcore-3.0)
 
-## 1.5. 数据访问层
+### 数据访问层
 
 > DATA ACCESS LAYER
 
@@ -171,7 +164,7 @@ public class OwnerController: Controller
 }
 ```
 
-## 1.6. 控制器
+### 控制器
 
 > CONTROLLERS
 
@@ -257,7 +250,7 @@ public IActionResult CreateOwner([FromBody]Owner owner)
 - Forbid => returns the 403 status code
 - StatusCode => returns the status code we provide as input
 
-## 1.7. 处理全局异常
+### 处理全局异常
 
 > HANDLING ERRORS GLOBALLY
 
@@ -345,7 +338,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 }
 ```
 
-## 1.8. 使用过滤器移除重复代码
+### 使用过滤器移除重复代码
 
 > USING ACTIONFILTERS TO REMOVE DUPLICATED CODE
 
@@ -383,7 +376,7 @@ services.AddScoped<ModelValidationAttribute>();
 
 现在，我们可以将上述注入的过滤器应用到我们的 action 中。
 
-## 1.9. Microsoft.AspNetCore.all 元包
+### Microsoft.AspNetCore.all 元包
 
 > MICROSOFT.ASPNETCORE.ALL META-PACKAGE
 
@@ -393,7 +386,7 @@ services.AddScoped<ModelValidationAttribute>();
 
 当然，为了能使用 Microsoft.AspNetCore.all 元包，需要确保你的机器安装了 .NET Core Runtime。
 
-## 1.10. 路由
+### 路由
 
 > ROUTING
 
@@ -468,7 +461,7 @@ public class OwnerController : Controller
 
 更多关于 Restful 实践的细节解释，请查阅：[Top REST API Best Practices](https://code-maze.com/top-rest-api-best-practices/)
 
-## 1.11. 日志
+### 日志
 
 > LOGGING
 
@@ -497,7 +490,7 @@ NLog 是一个很不错的可以用于我们自定义的日志逻辑类库，它
 
 Serilog 也是一个很不错的类库，它适用于 .NET Core 内置的日志系统。
 
-## 1.12. 加密
+### 加密
 
 > CRYPTOHELPER
 
@@ -523,7 +516,7 @@ public bool VerifyPassword(string hash, string password)
 }
 ```
 
-## 1.13. 内容协商
+### 内容协商
 
 > CONTENT NEGOTIATION
 
@@ -553,7 +546,7 @@ public void ConfigureServices(IServiceCollection services)
 
 这一部分内容是一个很大的主题，如果你希望了解更对，请查阅：[Content Negotiation in .NET Core](https://code-maze.com/content-negotiation-dotnet-core/)
 
-## 1.14. 使用 JWT
+### 使用 JWT
 
 > USING JWT
 
@@ -638,7 +631,7 @@ var id = auth.Principal.Claims.FirstOrDefault(x => x.Type.Equals(ClaimTypes.Name
 
 更多关于 .NET Core 中 JWT 认证和授权部分，请查阅：[authentication-aspnetcore-jwt-1](https://code-maze.com/authentication-aspnetcore-jwt-1/) 和 [authentication-aspnetcore-jwt-2](https://code-maze.com/authentication-aspnetcore-jwt-2/)
 
-## 1.15. 短地址算法
+### 短地址算法
 
 > Creating a Url Shortener Service
 
@@ -661,7 +654,7 @@ public static string GenerateShortUrl()
 
 如果你想了解更多关于如何创建短地址服务，这里有一份教程推荐给你：[Creating a Url Shortener Service From Scratch with .Net Core 3.0](https://blog.usejournal.com/creating-a-url-shortener-service-from-scratch-with-net-core-e8ebacad12c1)
 
-## 1.16. 后台服务
+### 后台服务
 
 > BACKGROUNDSERVICE
 
@@ -724,7 +717,7 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
 
 更多关于后台服务的部分，请查阅：[Background tasks with hosted services in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-3.1&tabs=visual-studio)
 
-## 1.17. 输入验证
+### 输入验证
 
 资源的输入验证可以采用多种方式，目前主要要如下方式：
 
@@ -773,7 +766,7 @@ public class CustomValidationAttribute:ValidationAttribute
 
 更多关于输入验证部分，请查阅：[Model validation in ASP.NET Core MVC and Razor Pages](https://docs.microsoft.com/en-us/aspnet/core/mvc/models/validation?view=aspnetcore-3.1)
 
-## 1.18. 缩略图
+### 缩略图
 
 如果你想创建指定图片的缩略图，可以尝试用于 [System.Drawing.Common](https://github.com/dotnet/corefx) 来解决，示例代码如下所示：
 
@@ -793,7 +786,7 @@ await Conversion.Snapshot(sourceFile, thumbFile, TimeSpan.FromSeconds(0)).Start(
 
 > 如果在 Linux 上运行，需要提前安装 _ffmpeg_ 库：`apt install ffmpeg`
 
-## 1.19. 读取 `app.config`
+### 读取 `app.config`
 
 在 .NET 应用程序中，`app.config` 是一个特殊文件，它会在程序编译后自动转换为主程序同名的 `xxx.dll.config` 文件。我们可以通过使用 `System.Configuration.ConfigurationManager` 来读取其中内容。为了能正常读取，我们需要确保将该文件的 `build action` 设置为 `Content`, `copy to output directory` 设置为 `Copy if newer/Copy always`。在非主程序类型的项目中如果想读取该文件，我们需要在对应的 `xxx.csproj` 中添加如下配置：
 
@@ -806,7 +799,7 @@ await Conversion.Snapshot(sourceFile, thumbFile, TimeSpan.FromSeconds(0)).Start(
 
 更多内容可参考：[ConfigurationManager doesn't find config file with "dotnet test"](https://github.com/dotnet/runtime/issues/22720)
 
-## 1.20. 总结
+## 总结
 
 在这份指南中，我们的主要目的是让你熟悉关于使用 .NET Core 开发 web API 项目时的一些最佳实践。这里面的部分内容在其它框架中也同样适用。因此，熟练掌握它们很有用。
 
