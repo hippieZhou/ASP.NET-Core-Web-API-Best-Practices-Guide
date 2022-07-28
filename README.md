@@ -28,6 +28,8 @@
   - [SyndicationFeed](#syndicationfeed)
 - [总结](#总结)
 
+> 如果内容有调整，请使用 [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one) 的 `create Table of Contents/update Table of Contents` 进行目录结构更新。
+
 ## 介绍
 
 当我们编写一个项目的时候，我们的主要目标是使它能如期运行，并尽可能地满足所有用户需求。
