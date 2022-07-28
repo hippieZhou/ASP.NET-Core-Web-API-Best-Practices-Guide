@@ -20,6 +20,7 @@
   - [加密](#加密)
   - [内容协商](#内容协商)
   - [使用 JWT](#使用-jwt)
+  - [使用 BasicAuthentication](#使用-basicauthentication)
   - [短地址算法](#短地址算法)
   - [后台服务](#后台服务)
   - [输入验证](#输入验证)
@@ -54,7 +55,7 @@
 
 例如，让我们看一个注册 CORS 服务的不好方式：
 
-```C#
+```csharp
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddCors(options =>
@@ -73,7 +74,7 @@ public void ConfigureServices(IServiceCollection services)
 
 一种好的方式是通过在扩展类中创建静态方法：
 
-```C#
+```csharp
 public static class ServiceExtensions
 {
     public static void ConfigureCors(this IServiceCollection services)
@@ -91,7 +92,7 @@ public static class ServiceExtensions
 
 然后，只需要调用这个扩展方法即可：
 
-```C#
+```csharp
 public void ConfigureServices(IServiceCollection services)
 {
     services.ConfigureCors();
@@ -154,7 +155,7 @@ public void ConfigureServices(IServiceCollection services)
 
 当我们编写 DAL 时，我们应该将其作为一个独立的服务来创建。在 .NET Core 项目中，这一点很重要，因为当我们将 DAL 作为一个独立的服务时，我们就可以将其直接注入到 IOC（控制反转）容器中。IOC 是 .NET Core 内置功能。通过这种方式，我们可以在任何控制器中通过构造函数注入的方式来使用。
 
-```C#
+```csharp
 public class OwnerController: Controller
 {
     private readonly IRepository _repository;
@@ -173,7 +174,7 @@ public class OwnerController: Controller
 
 因此，我们的控制器应该通过构造函数注入的方式接收服务实例，并组织 HTTP 的操作方法（GET，POST，PUT，DELETE，PATCH...）:
 
-```C#
+```csharp
 public class OwnerController : Controller
 {
     private readonly ILoggerManager _logger;
@@ -213,7 +214,7 @@ public class OwnerController : Controller
 
 我们的 Action 应该尽量保持简洁，它们的职责应该包括处理 HTTP 请求，验证模型，捕捉异常和返回响应。
 
-```C#
+```csharp
 [HttpPost]
 public IActionResult CreateOwner([FromBody]Owner owner)
 {
@@ -257,7 +258,7 @@ public IActionResult CreateOwner([FromBody]Owner owner)
 
 在上面的示例中，我们的 action 内部有一个 `try-catch` 代码块。这一点很重要，我们需要在我们的 action 方法体中处理所有的异常（包括未处理的）。一些开发者在 action 中使用 `try-catch` 代码块，这种方式明显没有任何问题。但我们希望 action 尽量保持简洁。因此，从我们的 action 中删除 `try-catch` ,并将其放在一个集中的地方会是一种更好的方式。.NET Core 给我们提供了一种处理全局异常的方式，只需要稍加修改，就可以使用内置且完善的的中间件。我们需要做的修改就是在 `Startup` 类中修改 `Configure` 方法：
 
-```C#
+```csharp
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 {
     app.UseExceptionHandler(config =>
@@ -288,7 +289,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 
 我们也可以通过创建自定义的中间件来实现我们的自定义异常处理：
 
-```C#
+```csharp
 // You may need to install the Microsoft.AspNetCore.Http.Abstractions package into your project
 public class CustomExceptionMiddleware
 {
@@ -332,7 +333,7 @@ public static class CustomExceptionMiddlewareExtensions
 
 之后，我们只需要将其注入到应用程序的请求管道中即可：
 
-```C#
+```csharp
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 {
     app.UseCustomExceptionMiddleware();
@@ -347,7 +348,7 @@ ASP.NET Core 的过滤器可以让我们在请求管道的特定状态之前或�
 
 当我们在 action 方法中处理 PUT 或者 POST 请求时，我们需要验证我们的模型对象是否符合我们的预期。作为结果，这将导致我们的验证代码重复，我们希望避免出现这种情况，（基本上，我们应该尽我们所能避免出现任何代码重复。）我们可以在代码中通过使用 ActionFilter 来代替我们的验证代码：
 
-```C#
+```csharp
 if (!ModelState.IsValid)
 {
     //bad request and logging logic
@@ -356,7 +357,7 @@ if (!ModelState.IsValid)
 
 我们可以创建一个过滤器：
 
-```C#
+```csharp
 public class ModelValidationAttribute : ActionFilterAttribute
 {
     public override void OnActionExecuting(ActionExecutingContext context)
@@ -371,7 +372,7 @@ public class ModelValidationAttribute : ActionFilterAttribute
 
 然后在 `Startup` 类的 `ConfigureServices` 函数中将其注入：
 
-```C#
+```csharp
 services.AddScoped<ModelValidationAttribute>();
 ```
 
@@ -395,7 +396,7 @@ services.AddScoped<ModelValidationAttribute>();
 
 我们可以使用 **[Route]** 属性来在控制器的顶部进行标注：
 
-```C#
+```csharp
 [Route("api/[controller]")]
 public class OwnerController : Controller
 {
@@ -409,7 +410,7 @@ public class OwnerController : Controller
 
 还有另一种方式为控制器和操作创建路由规则：
 
-```C#
+```csharp
 [Route("api/owner")]
 public class OwnerController : Controller
 {
@@ -427,7 +428,7 @@ public class OwnerController : Controller
 
 一个较差的示例：
 
-```C#
+```csharp
 [Route("api/owner")]
 public class OwnerController : Controller
 {
@@ -444,7 +445,7 @@ public class OwnerController : Controller
 
 一个较好的示例：
 
-```C#
+```csharp
 [Route("api/owner")]
 public class OwnerController : Controller
 {
@@ -470,7 +471,7 @@ public class OwnerController : Controller
 
 .NET Core 通过继承 `ILogger` 接口实现了它自己的日志记录。通过借助依赖注入机制，它可以很容易地使用。
 
-```C#
+```csharp
 public class TestController: Controller
 {
     private readonly ILogger _logger;
@@ -501,7 +502,7 @@ Serilog 也是一个很不错的类库，它适用于 .NET Core 内置的日志�
 
 CryptoHelper 是适用于 .NET Core 的独立密码哈希库，它是基于 PBKDF2 来实现的。通过创建 `Data Protection` 栈来将密码进行哈希化。这个类库在 NuGet 上是可用的，并且使用也很简单：
 
-```C#
+```csharp
 using CryptoHelper;
 
 // Hash a password
@@ -527,7 +528,7 @@ public bool VerifyPassword(string hash, string password)
 
 为了解决这个问题，我们需要进行服务端配置，用于按需格式化我们的响应结果：
 
-```C#
+```csharp
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddControllers().AddXmlDataContractSerializerFormatters();
@@ -536,7 +537,7 @@ public void ConfigureServices(IServiceCollection services)
 
 但有时客户端会请求一个我们 Web API 不支持的格式，因此最好的实践方式是对于未经处理的请求格式统一返回 406 状态码。这种方式也同样能在 ConfigureServices 方法中进行简单配置：
 
-```C#
+```csharp
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddControllers(options => options.ReturnHttpNotAcceptable = true).AddXmlDataContractSerializerFormatters();
@@ -549,13 +550,11 @@ public void ConfigureServices(IServiceCollection services)
 
 ### 使用 JWT
 
-> USING JWT
-
 现如今的 Web 开发中，JSON Web Tokens (JWT) 变得越来越流行。得益于 .NET Core 内置了对 JWT 的支持，因此实现起来非常容易。JWT 是一个开发标准，它允许我们以 JSON 格式在服务端和客户端进行安全的数据传输。
 
 我们可以在 ConfigureServices 中配置 JWT 认证：
 
-```C#
+```csharp
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -594,7 +593,7 @@ public void ConfigureServices(IServiceCollection services)
 
 为了能在应用程序中使用它，我们还需要在 Configure 中调用下面一段代码：
 
-```C#
+```csharp
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 {
     app.UseAuthentication();
@@ -603,7 +602,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 
 此外，创建 Token 可以使用如下方式：
 
-```C#
+```csharp
 var securityToken = new JwtSecurityToken(
                 claims: new Claim[]
                 {
@@ -623,7 +622,7 @@ Token = new JwtSecurityTokenHandler().WriteToken(securityToken)
 
 基于 Token 的用户验证可以在控制器中使用如下方式：
 
-```C#
+```csharp
 var auth = await HttpContext.AuthenticateAsync();
 var id = auth.Principal.Claims.FirstOrDefault(x => x.Type.Equals(ClaimTypes.NameIdentifier))?.Value;
 ```
@@ -632,13 +631,108 @@ var id = auth.Principal.Claims.FirstOrDefault(x => x.Type.Equals(ClaimTypes.Name
 
 更多关于 .NET Core 中 JWT 认证和授权部分，请查阅：[authentication-aspnetcore-jwt-1](https://code-maze.com/authentication-aspnetcore-jwt-1/) 和 [authentication-aspnetcore-jwt-2](https://code-maze.com/authentication-aspnetcore-jwt-2/)
 
+### 使用 BasicAuthentication
+
+首先，在需要进行 authentication 的 controller 上使用 `AuthorizeAttribute` 进行标注（也可以使用自定的 AuthorizeAttribute）。
+
+然后，定义并实现 `BasicAuthenticationHandler` 类，如下所示：
+
+```csharp
+public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+{
+    public BasicAuthenticationHandler(
+        IOptionsMonitor<AuthenticationSchemeOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder,
+        ISystemClock clock) : base(options, logger, encoder, clock)
+    {
+    }
+
+    protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+    {
+        await Task.Yield();
+
+        // skip authentication if endpoint has [AuthorizeAttribute] attribute
+        var endpoint = Context.GetEndpoint();
+        if (endpoint?.Metadata?.GetMetadata<AuthorizeAttribute>() == null)
+            return AuthenticateResult.NoResult();
+
+        if (!Request.Headers.ContainsKey("Authorization"))
+            return AuthenticateResult.Fail("Missing Authorization Header");
+
+        IUser user;
+        try
+        {
+            user = ExtractUserNameAndPassword();
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Invalid Authorization Header");
+            return AuthenticateResult.Fail("Invalid Authorization Header");
+        }
+
+        if (user == null)
+            return AuthenticateResult.Fail("Invalid Username or Password");
+
+        var principal = new ClaimsPrincipal(new GenericPrincipal(new GenericIdentity(user.Identity), user.Roles));
+        var ticket = new AuthenticationTicket(principal, Scheme.Name);
+
+        return AuthenticateResult.Success(ticket);
+    }
+
+    private IUser ExtractUserNameAndPassword()
+    {
+        var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+        var credentialBytes = Convert.FromBase64String(authHeader.Parameter!);
+        var credentials = Encoding.UTF8.GetString(credentialBytes).Split(new[] { ':' }, 2);
+        var username = credentials[0];
+        var password = credentials[1];
+
+        var repository = new ServiceUserRepository();
+        return repository.Authenticate(username, password, out _);
+    }
+}
+```
+
+最后，在 `Program` 类中进行注册，如下所示：
+
+```csharp
+ builder.Services
+     .AddAuthentication("BasicAuthentication")
+     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+
+// 在 Swagger 中集成 Basic Authentication
+builder.Services.AddSwaggerGen(config =>
+{
+    config.CustomSchemaIds(x => x.FullName);
+    var basicSecurityScheme = new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "basic",
+        Reference = new OpenApiReference { Id = "BasicAuth", Type = ReferenceType.SecurityScheme }
+    };
+    config.AddSecurityDefinition(basicSecurityScheme.Reference.Id, basicSecurityScheme);
+    config.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { basicSecurityScheme, Array.Empty<string>() }
+    });
+});
+
+......
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+......
+```
+
 ### 短地址算法
 
 > Creating a Url Shortener Service
 
 如果你想通过 .NET Core 来构建短地址服务，那么这里有一个比较不错的生成算法推荐给你：
 
-```C#
+```csharp
 public static string GenerateShortUrl()
 {
     string urlsafe = string.Empty;
@@ -663,7 +757,7 @@ public static string GenerateShortUrl()
 
 首先，创建一个继承自抽象类的 `BackgroundService` 实现类，然后实现里面的抽象方法 `ExecuteAsync` 即可，你可以参考下述方式：
 
-```C#
+```csharp
 public class NotificationService : BackgroundService
 {
     private readonly NotificationSettings _settings;
@@ -696,7 +790,7 @@ public class NotificationService : BackgroundService
 
 接着，在 `Startup` 类中的 `ConfigureServices` 进行相关配置，示例如下：
 
-```C#
+```csharp
 public void ConfigureServices(IServiceCollection services)
 {
     services.Configure<NotificationSettings>(Configuration.GetSection(nameof(NotificationSettings)));
@@ -706,7 +800,7 @@ public void ConfigureServices(IServiceCollection services)
 
 此时，我们就成功创建了一个可以长时间运行的后台服务。为了避免服务能及时在主进程退出时做相应处理，我们可以在 `Program` 类中进行如下配置：
 
-```C#
+```csharp
 public static IHostBuilder CreateHostBuilder(string[] args) =>
     Host.CreateDefaultBuilder(args)
         .ConfigureWebHostDefaults(webBuilder =>
@@ -728,7 +822,7 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
   - IValidatableObject
   - ValidationAttribute
 
-```C#
+```csharp
 public abstract class ModelResource : IValidatableObject
 {
     [Display(Name = "名")]
@@ -771,7 +865,7 @@ public class CustomValidationAttribute:ValidationAttribute
 
 如果你想创建指定图片的缩略图，可以尝试用于 [System.Drawing.Common](https://github.com/dotnet/corefx) 来解决，示例代码如下所示：
 
-```C#
+```csharp
 Image image = Image.FromFile(sourceFile);
 Image thumb = image.GetThumbnailImage(300, 250, () => false, IntPtr.Zero);
 thumb.Save(thumbFile);
@@ -781,7 +875,7 @@ thumb.Save(thumbFile);
 
 如果想创建视频文件的缩略图，可以尝试使用 [Xabe.FFmpeg](https://xabe.net/product/xabe_ffmpeg/) 来解决，示例代码如下所示：
 
-```C#
+```csharp
 await Conversion.Snapshot(sourceFile, thumbFile, TimeSpan.FromSeconds(0)).Start();
 ```
 
