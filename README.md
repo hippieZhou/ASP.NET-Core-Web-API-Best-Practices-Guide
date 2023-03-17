@@ -27,6 +27,7 @@
   - [缩略图](#缩略图)
   - [读取 `app.config`](#读取-appconfig)
   - [SyndicationFeed](#syndicationfeed)
+  - [MultipartFormDataContent](#multipartformdatacontent)
 - [总结](#总结)
 
 > 如果内容有调整，请使用 [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one) 的 `create Table of Contents/update Table of Contents` 进行目录结构更新。
@@ -930,6 +931,50 @@ private static SyndicationFeed ReadAsSyndicationFeed(ContentResult result)
     formatter.ReadFrom(xmlReader);
     return formatter.Feed;
 }
+```
+
+### MultipartFormDataContent
+
+在 .NET Core 中，如果想对 MultipartFormDataContent 类型的数据进行处理，可以参考如下方式
+
+```csharp
+# write
+
+using var memoryStream = new MemoryStream();
+using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+{
+    var demoFile = archive.CreateEntry("foo.txt");
+
+    await using (var entryStream = demoFile.Open())
+    await using (var streamWriter = new StreamWriter(entryStream))
+    {
+        await streamWriter.WriteAsync("Bar!");
+    }
+}
+
+using var multipartContent = new MultipartFormDataContent();
+multipartContent.Add(new StreamContent(memoryStream), "zipArchive", "test.zip");
+multipartContent.Add(new StringContent("hello world", Encoding.UTF8, MediaTypeNames.Text.Plain), "content");
+
+var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+request.Content = multipartContent;
+var response = await httpClient.SendAsync(request);
+
+# read
+var dic = new Dictionary<string, object>();
+var form = HttpContext.Request.Form;
+var file = form.Files.FirstOrDefault(x => string.Equals(x.Name, "zipArchive"));
+if (file != null)
+{
+    dic.Add("zipArchive", new ZipArchive(file.OpenReadStream()));
+}
+
+var firstName = form.FirstOrDefault(x => string.Equals(x.Key, "content", StringComparison.CurrentCultureIgnoreCase));
+if (firstName.Key != null)
+{
+    dic.Add("content", firstName.Value);
+}
+
 ```
 
 ## 总结
