@@ -28,6 +28,7 @@
   - [读取 `app.config`](#读取-appconfig)
   - [SyndicationFeed](#syndicationfeed)
   - [MultipartFormDataContent](#multipartformdatacontent)
+  - [NewtonsoftJson  ](#newtonsoftjson)
 - [总结](#总结)
 
 > 如果内容有调整，请使用 [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one) 的 `create Table of Contents/update Table of Contents` 进行目录结构更新。
@@ -976,6 +977,35 @@ if (firstName.Key != null)
 }
 
 ```
+
+### NewtonsoftJson  
+
+由于 `.NET WebAPI` 和 `.NET Core API` 在处理请求时的 ModelBinder 逻辑有些差异（当类型不匹配时，.NET WebAPI 会兼容处理，但是在 .NET Core 中就会显示类型不匹配的问题）。当我们的接口是从 FX 迁移到 .NET Core 时，就需要考虑这种场景，可以添加如下配置，确保迁移过来的接口参数处理逻辑保持不变：
+
+```csharp
+services.AddControllers(options =>
+{
+    options.OutputFormatters.RemoveType<StringOutputFormatter>();
+    options.OutputFormatters.RemoveType<HttpNoContentOutputFormatter>();
+}).AddNewtonsoftJson(options =>
+{
+    #region this can be removed after upgrading to .NET 7
+    const string enableSkipHandledError = "Microsoft.AspNetCore.Mvc.NewtonsoftJson.EnableSkipHandledError";
+    AppContext.SetSwitch(enableSkipHandledError, true);
+    #endregion
+
+    options.SerializerSettings.Error += (sender, args) =>
+    {
+        var errorCtx = args.ErrorContext.Error;
+        LogManager.GetLogger(nameof(Program)).Log(LogLevel.Error, errorCtx, $"can not process request body with incorrect type:{errorCtx.Message}");
+        args.ErrorContext.Handled = true;
+    };
+    options.AddSerializerSettings();
+});
+
+```
+
+更多信息可以参考这个 [issue](https://github.com/dotnet/aspnetcore/issues/37323)
 
 ## 总结
 
