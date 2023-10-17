@@ -26,6 +26,7 @@
   - [输入验证](#输入验证)
   - [缩略图](#缩略图)
   - [读取 `app.config`](#读取-appconfig)
+  - [在集成测试中新增 API](#在集成测试中新增-api)
   - [SyndicationFeed](#syndicationfeed)
   - [MultipartFormDataContent](#multipartformdatacontent)
   - [NewtonsoftJson  ](#newtonsoftjson)
@@ -895,6 +896,34 @@ await Conversion.Snapshot(sourceFile, thumbFile, TimeSpan.FromSeconds(0)).Start(
 ```
 
 更多内容可参考：[ConfigurationManager doesn't find config file with "dotnet test"](https://github.com/dotnet/runtime/issues/22720)
+
+### 在集成测试中新增 API
+
+如果我们现在集成测试中新增接口用于测试应用程序的一些全局性配置是否正确，可以考虑使用 `ApplicationParts` 方式来解决这个问题。如下述示例代码：
+
+```csharp
+
+public class PayloadTestController : ApiController
+{
+    [HttpPost("test")]
+    public IActionResult Process([FromBody] Person person)
+    {
+        return Ok(person);
+    }
+}
+
+client = new ApiTestFactory<Program>()
+    .WithWebHostBuilder(builder =>
+    {
+        builder.ConfigureServices(services =>
+        {
+            var partManager = (ApplicationPartManager)services
+                .Last(descriptor => descriptor.ServiceType == typeof(ApplicationPartManager))
+                .ImplementationInstance
+            partManager.ApplicationParts.Add(new AssemblyPart(Assembly.GetAssembly(type(PayloadTestController))));
+        });
+    }).CreateClient();
+```
 
 ### SyndicationFeed
 
