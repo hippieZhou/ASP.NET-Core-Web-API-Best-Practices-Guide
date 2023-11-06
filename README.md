@@ -27,9 +27,10 @@
   - [缩略图](#缩略图)
   - [读取 `app.config`](#读取-appconfig)
   - [在集成测试中新增 API](#在集成测试中新增-api)
+  - [在 `SwaggerUI` 中请求接口防止参数被自动转义](#在-swaggerui-中请求接口防止参数被自动转义)
   - [SyndicationFeed](#syndicationfeed)
   - [MultipartFormDataContent](#multipartformdatacontent)
-  - [NewtonsoftJson  ](#newtonsoftjson)
+  - [NewtonsoftJson](#newtonsoftjson)
 - [总结](#总结)
 
 > 如果内容有调整，请使用 [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one) 的 `create Table of Contents/update Table of Contents` 进行目录结构更新。
@@ -925,6 +926,24 @@ client = new ApiTestFactory<Program>()
     }).CreateClient();
 ```
 
+### 在 `SwaggerUI` 中请求接口防止参数被自动转义
+
+如果我们的后端应用集成了 `SwaggerUI` 的话，如果接口参数包含 `/` 时会被自动转义，这种行为和实际的接口请求不一致，为了解决这个问题，我们可以在 `Program.cs` 中使用如下配置：
+
+```csharp
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        var request = "(request) => { console.log(request); request.url = decodeURIComponent(request.url); return request; }";
+        options.UseRequestInterceptor(request);
+    });
+}
+```
+
+相关参考：[Prevent escaping html in path params? ](https://github.com/swagger-api/swagger-ui/issues/1637)
+
 ### SyndicationFeed
 
 ```csharp
@@ -1007,7 +1026,7 @@ if (firstName.Key != null)
 
 ```
 
-### NewtonsoftJson  
+### NewtonsoftJson
 
 由于 `.NET WebAPI` 和 `.NET Core API` 在处理请求时的 ModelBinder 逻辑有些差异（当类型不匹配时，.NET WebAPI 会兼容处理，但是在 .NET Core 中就会显示类型不匹配的问题）。当我们的接口是从 FX 迁移到 .NET Core 时，就需要考虑这种场景，可以添加如下配置，确保迁移过来的接口参数处理逻辑保持不变：
 
